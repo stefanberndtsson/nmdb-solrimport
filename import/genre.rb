@@ -4,6 +4,7 @@ module Importer
     REL_COLUMNS = ["id", "movie_id", "genre_id"]
     CLASS="Genre"
     REL_CLASS="MovieGenre"
+    REDUCE = ["Adult"]
 
     def initialize(importer, filenames)
       @node_file = filenames[0]
@@ -24,6 +25,7 @@ module Importer
     end
 
     def import_relations
+      movie_reduce = {}
       File.open(@relation_file, "r:utf-8").each_line do |line|
         line.chomp!
         data = Hash[REL_COLUMNS.zip(line.split(/\t/))]
@@ -35,7 +37,12 @@ module Importer
         data.remove!(["id", "movie_id", "genre_id"])
         data["genre"] = genre
         data.remove!(["class"])
+        movie_reduce[movie_node] = true if REDUCE.include?(data["genre"])
+        @imp.store_data("movie_reduce", movie_node, true);
         @imp.solr_add("movie", movie_node, data)
+      end
+      movie_reduce.keys.each do |movie_node|
+        @imp.solr_add("movie", movie_node, {"reduce_genre" => true})
       end
     end
   end

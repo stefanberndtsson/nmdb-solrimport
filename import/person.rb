@@ -140,11 +140,13 @@ module Importer
         @imp.solr_add("movie", movie_node, solr_data)
 
         person_score[person_node] ||= 0
-        person_score[person_node] += data["occupation_score"].to_i
         person_link_score[person_node] ||= 0
-        person_link_score[person_node] += @imp.fetch_data("movie_score", movie_node).to_i
         person_movie_count[person_node] ||= 0
-        person_movie_count[person_node] += 1
+        unless @imp.fetch_data("movie_reduce", movie_node)
+          person_score[person_node] += data["occupation_score"].to_i
+          person_link_score[person_node] += @imp.fetch_data("movie_score", movie_node).to_i
+          person_movie_count[person_node] += 1
+        end
         movie_title = @imp.fetch_data("movie_title", data["movie_id"])
         movie_episode_name = @imp.fetch_data("movie_episode_name", data["movie_id"])
         solr_data = data.get(["character"])
