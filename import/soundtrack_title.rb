@@ -24,7 +24,7 @@ module Importer
         data.remove_blanks!
         movie_node = data["movie_id"]
         data.remove!(["movie_id"])
- #       @imp.xxstore_data("soundtrack_title_movie_node", data["id"], movie_node)
+ #       @imp.store_data("soundtrack_title_movie_node", data["id"], movie_node)
         data.remove!(["id", "class"])
         data.rename_keys!({"title" => "soundtrack_title"})
         @imp.solr_add("movie", movie_node, data)
@@ -39,7 +39,7 @@ module Importer
         data.copy_to_int!({"sort_value" => "sort_integer"})
         data.remove_blanks!
         soundtrack_title_node = data["soundtrack_title_id"]
-        movie_node = @imp.xxfetch_data("soundtrack_title_movie_node", data["soundtrack_title_id"])
+        movie_node = @imp.fetch_data("soundtrack_title_movie_node", data["soundtrack_title_id"])
         data.remove!(["soundtrack_title_id"])
       end
     end

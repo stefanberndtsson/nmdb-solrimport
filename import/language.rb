@@ -19,7 +19,7 @@ module Importer
         data = Hash[NODE_COLUMNS.zip(line.split(/\t/))]
         data.to_int!(["id"])
         data.remove_blanks!
-        @imp.xxstore_data("language", data["id"], data["language"])
+        @imp.store_data("language", data["id"], data["language"])
       end
     end
 
@@ -29,7 +29,7 @@ module Importer
         data = Hash[REL_COLUMNS.zip(line.split(/\t/))]
         data.to_int!(["id", "movie_id", "language_id"])
         data.remove_blanks!
-        language = @imp.xxfetch_data("language", data["language_id"]).dup
+        language = @imp.fetch_data("language", data["language_id"]).dup
         movie_node = data["movie_id"]
         language_node = data["language_id"]
         data.remove!(["id", "movie_id", "language_id"])

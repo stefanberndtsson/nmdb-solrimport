@@ -19,7 +19,7 @@ module Importer
         data.remove_blanks!
         next if !data["plot"] || data["plot"].empty?
         movie_node = data["movie_id"]
-        @imp.xxstore_data("plot", data["movie_id"], query_data["plot_norm"], :append)
+        @imp.store_data("plot", data["movie_id"], query_data["plot_norm"], :append)
         data.remove!(["movie_id", "plot_norm"])
         query_data.rename_keys!({"plot_norm" => "plot"})
         @imp.solr_add("movie", movie_node, query_data)

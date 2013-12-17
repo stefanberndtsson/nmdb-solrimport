@@ -120,7 +120,7 @@ module Importer
       load_years
       import
       import_episode_relations
-      @imp.xxclear_data("episode_parent_title")
+      @imp.clear_data("episode_parent_title")
       import_ratings
       import_completeness("cast")
       import_completeness("crew")
@@ -154,13 +154,13 @@ module Importer
         title_norm = data["title_norm"]
 
         episode_name_norm = data["episode_name_norm"]
-        @imp.xxstore_data("movie_title", data["id"], data["title_norm"])
-        @imp.xxstore_data("movie_episode_name", data["id"], data["episode_name_norm"])
+        @imp.store_data("movie_title", data["id"], data["title_norm"])
+        @imp.store_data("movie_episode_name", data["id"], data["episode_name_norm"])
         data.remove!(["suspended", "title_norm", "episode_name_norm", "episode_parent_title"])
         node = data["id"]
-        @imp.xxstore_data("episode_parent_title", data["full_title"], node) unless data["is_episode"]
-        @imp.xxstore_data("movie_is_episode", data["id"], data["is_episode"])
-        @imp.xxstore_data("movie_is_tvseries", data["id"], data["title_category"] == "TVS")
+        @imp.store_data("episode_parent_title", data["full_title"], node) unless data["is_episode"]
+        @imp.store_data("movie_is_episode", data["id"], data["is_episode"])
+        @imp.store_data("movie_is_tvseries", data["id"], data["title_category"] == "TVS")
 
         if @years[data["id"]]
           data["years"] = @years[data["id"]].map do |year|
@@ -181,11 +181,11 @@ module Importer
         data = Hash[COLUMNS.zip(line.split(/\t/))]
         data.to_int!(["id", "episode_season", "episode_episode"])
         data.to_bool!(["year_open_end", "is_episode"])
-        parent_node = @imp.xxfetch_data("episode_parent_title", data["episode_parent_title"])
+        parent_node = @imp.fetch_data("episode_parent_title", data["episode_parent_title"])
         episode_node = data["id"]
         next if parent_node.to_i == 0 || episode_node.to_i == 0
-        @imp.xxstore_data("movie_episode_parent_node", data["id"], parent_node)
-        @imp.xxstore_data("has_episodes", parent_node, true)
+        @imp.store_data("movie_episode_parent_node", data["id"], parent_node)
+        @imp.store_data("has_episodes", parent_node, true)
       end
     end
 

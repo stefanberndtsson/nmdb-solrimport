@@ -24,7 +24,7 @@ module Importer
         data.remove_blanks!
         movie_node = data["movie_id"]
         data.remove!(["movie_id"])
-        @imp.xxstore_data("quote_movie_node", data["id"], movie_node)
+        @imp.store_data("quote_movie_node", data["id"], movie_node)
       end
     end
 
@@ -37,7 +37,7 @@ module Importer
         data.copy_to_int!({"sort_value" => "sort_integer"})
         data.remove_blanks!
         quote_node = data["quote_id"]
-        movie_node = @imp.xxfetch_data("quote_movie_node", data["quote_id"])
+        movie_node = @imp.fetch_data("quote_movie_node", data["quote_id"])
         data.remove!(["quote_id", "quote_norm"])
         query_data.rename_keys!({"quote_norm" => "quote"})
         @imp.solr_add("movie", movie_node, query_data)

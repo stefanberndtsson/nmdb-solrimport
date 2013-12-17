@@ -76,18 +76,25 @@ module Importer
         linked_movie_node = data["linked_movie_id"]
         data["connection_type"] = MC_TYPES[data["connection_type_id"]]
         link_score = MC_SCORE[data["connection_type_id"]]
+        link_type = data["connection_type_id"]
 
         data.remove!(["id", "movie_id", "linked_movie_id", "connection_type_id"])
 
         data.remove!(["text", "created_at", "updated_at"]) if data["text"] && data["text"] == "[NONE]"
 
-        @imp.xxstore_data("movie_score", movie_node, link_score[0] + @imp.xxfetch_data("movie_score", movie_node).to_i)
-        @imp.xxstore_data("movie_score", linked_movie_node, link_score[1] + @imp.xxfetch_data("movie_score", linked_movie_node).to_i)
+        @imp.store_data("movie_score", movie_node, link_score[0] + @imp.fetch_data("movie_score", movie_node).to_i)
+        @imp.store_data("movie_score", linked_movie_node, link_score[1] + @imp.fetch_data("movie_score", linked_movie_node).to_i)
+        @imp.inc_data("movie_score_linktype_#{link_type}", movie_node)
 #        @imp.solr_add("movie", movie_node, data)
 #        @imp.solr_add("movie", linked_movie_node, data)
       end
-      @imp.xxstored_identifiers("movie_score").each do |key|
-        @imp.solr_add("movie", key, {"link_score" => @imp.xxfetch_data("movie_score", key)})
+      @imp.stored_identifiers("movie_score").each do |key|
+        @imp.solr_add("movie", key, {"link_score" => @imp.fetch_data("movie_score", key)})
+      end
+      MC_TYPES.keys.each do |link_type|
+        @imp.stored_identifiers("movie_score_linktype_#{link_type}").each do |key|
+          @imp.solr_add("movie", key, {"link_score_linktype_#{link_type}" => @imp.fetch_data("movie_score_linktype_#{link_type}", key)})
+        end
       end
     end
   end

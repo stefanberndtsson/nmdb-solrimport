@@ -20,7 +20,7 @@ module Importer
         data = Hash[NODE_COLUMNS.zip(line.split(/\t/))]
         data.to_int!(["id"])
         data.remove_blanks!
-        @imp.xxstore_data("keyword", data["id"], data["keyword"])
+        @imp.store_data("keyword", data["id"], data["keyword"])
       end
     end
 
@@ -31,8 +31,8 @@ module Importer
         data = Hash[REL_COLUMNS.zip(line.split(/\t/))]
         data.to_int!(["id", "movie_id", "keyword_id"])
         data.remove_blanks!
-        plots = @imp.xxfetch_data("plot", data["movie_id"])
-        keyword = @imp.xxfetch_data("keyword", data["keyword_id"]).dup
+        plots = @imp.fetch_data("plot", data["movie_id"])
+        keyword = @imp.fetch_data("keyword", data["keyword_id"]).dup
         movie_node = data["movie_id"]
         keyword_node = data["keyword_id"]
         data.remove!(["id", "movie_id", "keyword_id"])

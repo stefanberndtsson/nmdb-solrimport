@@ -60,9 +60,9 @@ module Importer
       import_akas
       import_relations
       import_metadata
-      @imp.xxclear_data("movie_title")
-      @imp.xxclear_data("movie_episode_name")
-      @imp.xxclear_data("person_name")
+      @imp.clear_data("movie_title")
+      @imp.clear_data("movie_episode_name")
+      @imp.clear_data("person_name")
     end
 
     def import_nodes
@@ -72,7 +72,7 @@ module Importer
         data.to_int!(["id"])
         data.remove_blanks!
         name_norm = data["name_norm"]
-        @imp.xxstore_data("person_name", data["id"], data["name_norm"])
+        @imp.store_data("person_name", data["id"], data["name_norm"])
         data.remove!(["name_norm"])
         node = data["id"]
         data["name"] = name_norm
@@ -113,10 +113,10 @@ module Importer
         person_node = data["person_id"]
         data["role"] = ROLES[data["role_id"]]
 
-        parent_node = @imp.xxfetch_data("movie_episode_parent_node", data["movie_id"])
-        if parent_node && @imp.xxfetch_data("movie_is_tvseries", data["movie_id"]) &&
-            @imp.xxfetch_data("movie_is_episode", data["movie_id"]) &&
-            @imp.xxfetch_data("has_episodes", parent_node) &&
+        parent_node = @imp.fetch_data("movie_episode_parent_node", data["movie_id"])
+        if parent_node && @imp.fetch_data("movie_is_tvseries", data["movie_id"]) &&
+            @imp.fetch_data("movie_is_episode", data["movie_id"]) &&
+            @imp.fetch_data("has_episodes", parent_node) &&
             [1,2].include?(data["role_id"])
           pid = data["person_id"]
           person_movie_episode_count[parent_node] ||= {}
@@ -133,7 +133,7 @@ module Importer
 
         movie_score[movie_node] ||= 0
         movie_score[movie_node] += data["occupation_score"].to_i
-        person_name = @imp.xxfetch_data("person_name", data["person_id"])
+        person_name = @imp.fetch_data("person_name", data["person_id"])
         solr_data = data.get(["character"])
         solr_data["cast"] = person_name
         solr_data["cast_ids"] = data["person_id"].to_i
@@ -142,11 +142,11 @@ module Importer
         person_score[person_node] ||= 0
         person_score[person_node] += data["occupation_score"].to_i
         person_link_score[person_node] ||= 0
-        person_link_score[person_node] += @imp.xxfetch_data("movie_score", movie_node).to_i
+        person_link_score[person_node] += @imp.fetch_data("movie_score", movie_node).to_i
         person_movie_count[person_node] ||= 0
         person_movie_count[person_node] += 1
-        movie_title = @imp.xxfetch_data("movie_title", data["movie_id"])
-        movie_episode_name = @imp.xxfetch_data("movie_episode_name", data["movie_id"])
+        movie_title = @imp.fetch_data("movie_title", data["movie_id"])
+        movie_episode_name = @imp.fetch_data("movie_episode_name", data["movie_id"])
         solr_data = data.get(["character"])
         solr_data["movies"] = [movie_title, movie_episode_name].compact.join(" ")
         @imp.solr_add("person", person_node, solr_data)
@@ -163,7 +163,7 @@ module Importer
       movie_score.keys.each do |key|
         score = movie_score[key]
         if person_movie_episode_count[key]
-          score = 1000*(score / sum_episode_counts(person_movie_episode_count[key].keys.map {|x| person_movie_episode_count[key][x].count }).to_f)
+          score = 20*(score / sum_episode_counts(person_movie_episode_count[key].keys.map {|x| person_movie_episode_count[key][x].count }).to_f)
         end
         @imp.solr_add("movie", key, {"occupation_score" => score.to_i })
       end
@@ -179,7 +179,7 @@ module Importer
           next if episode_count < 10 && (episode_count < highest_episode_count*0.5)
           next if episode_count < highest_episode_count*0.05
           person_node = person_id
-          person_name = @imp.xxfetch_data("person_name", person_id)
+          person_name = @imp.fetch_data("person_name", person_id)
           episode_character = find_max_char(person_movie_episode_count[movie_node][person_id].map {|x| x[:character] })
           role = person_movie_episode_count[movie_node][person_id].first[:role]
           role_id = person_movie_episode_count[movie_node][person_id].first[:role_id]

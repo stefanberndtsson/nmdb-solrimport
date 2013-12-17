@@ -51,14 +51,7 @@ module Importer
       solr_write(section, node, data)
     end
 
-    def xxdetach_data
-      @store.keys.each do |key|
-        STDERR.puts("DEBUG: Clearing #{key}")
-        clear_data(key)
-      end
-    end
-
-    def xxstore_data(key, identifier, data, mode = :replace)
+    def store_data(key, identifier, data, mode = :replace)
       @store[key] ||= {}
       if mode == :append
         if @store[key][identifier].is_a?(Array)
@@ -71,30 +64,21 @@ module Importer
       end
     end
 
-    def xxfetch_data(key, identifier)
+    def fetch_data(key, identifier)
       @store[key] ||= {}
       @store[key][identifier]
     end
 
-    def xxclear_data(key)
+    def inc_data(key, identifier)
+      store_data(key, identifier, fetch_data(key, identifier).to_i + 1)
+    end
+
+    def clear_data(key)
       @store.delete(key)
     end
 
-    def xxstored_identifiers(key)
-      @store[key].keys
-    end
-
-    def xxdecode_links(node_class, text)
-      return if !text
-      text.scan(/@@(PID|MID)@(\d+)@@/).each do |list|
-        link_type,link_id = list
-        link_node = nil
-        if link_type == "MID"
-          link_node = fetch_data("movie_id", link_id.to_i)
-        elsif link_type == "PID"
-          link_node = fetch_data("person_id", link_id.to_i)
-        end
-      end
+    def stored_identifiers(key)
+      (@store[key] || {}).keys
     end
   end
 end
